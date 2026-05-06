@@ -1,0 +1,123 @@
+#include <iostream>
+#include <queue>
+#include <vector>
+#include <string>
+
+using namespace std;
+
+class Node {
+public:
+    char data;
+    int freq;
+    Node *left, *right;
+
+    Node(char d, int f) {
+        data = d;
+        freq = f;
+        left = right = NULL;
+    }
+};
+
+class Compare {
+public:
+    bool operator()(Node* l, Node* r) {
+        return l->freq > r->freq;
+    }
+};
+
+class Huffman {
+private:
+    Node* root;
+    double totalOriginalBits;
+    double totalCompressedBits;
+
+    void process(Node* curr, string code) {
+        if (!curr) return;
+        if (curr->data != '$') {
+            cout << curr->data << ": " << code << endl;
+            totalOriginalBits += (curr->freq * 8);
+            totalCompressedBits += (curr->freq * code.length());
+        }
+        process(curr->left, code + "0");
+        process(curr->right, code + "1");
+    }
+
+public:
+    Huffman() {
+        root = NULL;
+        totalOriginalBits = 0;
+        totalCompressedBits = 0;
+    }
+
+    void build(char data[], int freq[], int n) {
+        priority_queue<Node*, vector<Node*>, Compare> minHeap;
+        for (int i = 0; i < n; i++) {
+            minHeap.push(new Node(data[i], freq[i]));
+        }
+
+        while (minHeap.size() > 1) {
+            Node* left = minHeap.top();  minHeap.pop();
+            Node* right = minHeap.top(); minHeap.pop();
+
+            Node* parent = new Node('$', left->freq + right->freq);
+            parent->left = left;
+            parent->right = right;
+            minHeap.push(parent);
+        }
+        root = minHeap.top();
+    }
+
+    void display() {
+        cout << "\nGenerated Huffman Codes:" << endl;
+        process(root, "");
+        if (totalCompressedBits > 0) {
+            cout << "\nCompression Ratio: " << totalOriginalBits / totalCompressedBits << endl;
+        }
+    }
+};
+
+int main() {
+    int n;
+    cout << "Enter the number of unique characters: ";
+    cin >> n;
+
+    char* chars = new char[n];
+    int* freq = new int[n];
+
+    for (int i = 0; i < n; i++) {
+        cout << "Enter character " << i + 1 << ": ";
+        cin >> chars[i];
+        cout << "Enter frequency: ";
+        cin >> freq[i];
+    }
+
+    Huffman h;
+    h.build(chars, freq, n);
+    h.display();
+
+    delete[] chars;
+    delete[] freq;
+
+    return 0;
+}
+[24bcsl05@mepcolinux ex7]$./a.out
+Enter the number of unique characters: 5
+Enter character 1: s
+Enter frequency: 46
+Enter character 2: b
+Enter frequency: 34
+Enter character 3: i
+Enter frequency: 27
+Enter character 4: u
+Enter frequency: 58
+Enter character 5: h
+Enter frequency: 38
+
+Generated Huffman Codes:
+h: 00
+s: 01
+u: 10
+i: 110
+b: 111
+
+Compression Ratio: 3.47752
