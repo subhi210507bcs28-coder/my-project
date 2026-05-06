@@ -1,0 +1,139 @@
+#include<iostream>
+
+// Use the std namespace directly instead of repeating std::
+using namespace std;
+
+// Function prototypes must be declared before main to be used
+void SelectionSort(int arr[], int n);
+void BubbleSort(int arr[], int n);
+
+int main() {
+    int n;
+    cout << "Enter size: "; // Corrected prompt spacing
+    cin >> n;
+
+    // Use dynamic allocation for variable length arrays,
+    // or std::vector for safer, more modern C++
+    int* arr = new int[n];
+
+    for (int i = 0; i < n; i++) {
+        cout << "Enter element " << i + 1 << ": "; // Clarified prompt
+        cin >> arr[i];
+    }
+
+    // Create separate copies of the array to sort independently
+    int* arrBubble = new int[n];
+    for (int i = 0; i < n; i++) {
+        arrBubble[i] = arr[i];
+    }
+
+
+    cout << "\n--- SELECTION SORT ---" << endl; // Added newlines and clarity
+    SelectionSort(arr, n);
+    cout << "\n--- BUBBLE SORT ---" << endl;
+    BubbleSort(arrBubble, n);
+
+    // Clean up dynamic memory
+    delete[] arr;
+    delete[] arrBubble;
+
+    return 0;
+}
+
+void SelectionSort(int arr[], int n) {
+    int min_idx, temp; // Renamed 'min' to 'min_idx' to avoid conflicts
+
+    // The outer loop should run up to n-1 elements
+    for (int i = 0; i < n - 1; i++) {
+        min_idx = i;
+
+        // The inner loop checks from i+1 to the end of the array (n-1)
+        for (int j = i + 1; j < n; j++) {
+            if (arr[j] < arr[min_idx]) // Changed condition to find minimum correctly
+                min_idx = j;
+        }
+
+        // Swap the found minimum element with the first element of the unsorted part
+        if (min_idx != i) { // Only swap if necessary
+            temp = arr[i];
+            arr[i] = arr[min_idx];
+            arr[min_idx] = temp;
+        }
+
+        // Print intermediate passes
+        cout << "Pass " << i + 1 << ": ";
+        for (int k = 0; k < n; k++) {
+            cout << arr[k] << " ";
+        }
+        cout << endl;
+    }
+
+    cout << "Sorted array: ";
+    for (int k = 0; k < n; k++) {
+        cout << arr[k] << " ";
+    }
+    cout << endl;
+}
+
+void BubbleSort(int arr[], int n) {
+    int i, j, temp;
+    bool swapped; // Added a flag for optimization
+
+    // Outer loop runs n-1 times
+    for (i = 0; i < n - 1; i++) {
+        swapped = false;
+
+        // Inner loop runs fewer times each pass (up to n-1-i)
+        for (j = 0; j < n - 1 - i; j++) {
+            if (arr[j] > arr[j + 1]) { // Compare adjacent elements (asc order)
+                // Swap them if they are in the wrong order
+                temp = arr[j];
+                arr[j] = arr[j + 1];
+                arr[j + 1] = temp;
+                swapped = true;
+            }
+        }
+
+        // Print intermediate passes
+        cout << "Pass " << i + 1 << ": ";
+        for (int k = 0; k < n; k++) {
+            cout << arr[k] << " ";
+        }
+        cout << endl;
+
+        // If no two elements were swapped by inner loop, then break
+        // the array is already sorted
+        if (!swapped)
+            break;
+    }
+
+    cout << "Sorted array: ";
+    for (int k = 0; k < n; k++) {
+        cout << arr[k] << " ";
+    }
+    cout << endl;
+}
+[24bcsl05@mepcolinux daa]$./a.out
+Enter size: 6
+Enter element 1: 33
+Enter element 2: 55
+Enter element 3: 44
+Enter element 4: 67
+Enter element 5: 56
+Enter element 6: 43
+
+--- SELECTION SORT ---
+Pass 1: 33 55 44 67 56 43
+Pass 2: 33 43 44 67 56 55
+Pass 3: 33 43 44 67 56 55
+Pass 4: 33 43 44 55 56 67
+Pass 5: 33 43 44 55 56 67
+Sorted array: 33 43 44 55 56 67
+
+--- BUBBLE SORT ---
+Pass 1: 33 44 55 56 43 67
+Pass 2: 33 44 55 43 56 67
+Pass 3: 33 44 43 55 56 67
+Pass 4: 33 43 44 55 56 67
+Pass 5: 33 43 44 55 56 67
+Sorted array: 33 43 44 55 56 67
