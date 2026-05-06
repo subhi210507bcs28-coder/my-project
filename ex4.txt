@@ -1,0 +1,124 @@
+#include<iostream>
+using namespace std;
+
+class Heap {
+private:
+    int *arr;
+    int capacity;
+    int size;
+
+public:
+    Heap(int data[], int n);
+    ~Heap();
+    int deletemin();
+    int isEmpty() { return size == 0; }
+    void display();
+};
+
+Heap::Heap(int data[], int n) {
+    size = n;
+    capacity = 100;
+    arr = new int[capacity + 1];
+    for (int i = 0; i < n; i++) {
+        arr[i + 1] = data[i];
+    }
+    for (int i = size / 2; i >= 1; i--) {
+        int lastElt = arr[i];
+        int parent = i, child;
+        while (parent * 2 <= size) {
+            child = parent * 2;
+            if (child != size && arr[child + 1] < arr[child])
+                child++;
+            if (lastElt > arr[child]) {
+                arr[parent] = arr[child];
+                parent = child;
+            } else break;
+        }
+        arr[parent] = lastElt;
+    }
+}
+
+Heap::~Heap() {
+    delete[] arr;
+}
+
+int Heap::deletemin() {
+    if (isEmpty()) return -1;
+    int deleteElt = arr[1];
+    int lastElt = arr[size--];
+    int i, child;
+    for (i = 1; i * 2 <= size; i = child) {
+        child = i * 2;
+        if (child != size && arr[child + 1] < arr[child])
+            child++;
+        if (lastElt > arr[child])
+            arr[i] = arr[child];
+        else
+            break;
+    }
+    if (size + 1 > 0) arr[i] = lastElt;
+    return deleteElt;
+}
+
+void Heap::display() {
+    if (isEmpty()) {
+        cout << "[Empty]";
+    } else {
+        for (int i = 1; i <= size; i++) {
+            cout << arr[i] << " ";
+        }
+    }
+    cout << endl;
+}
+
+int main() {
+    int n;
+    cout << "Enter the number of elements: ";
+    cin >> n;
+
+    int* inputData = new int[n];
+    cout << "Enter " << n << " numbers: ";
+    for (int i = 0; i < n; i++) {
+        cin >> inputData[i];
+    }
+
+    int* sortedResult = new int[n];
+    int count = 0;
+    Heap h(inputData, n);
+    cout << "\n--- Iteration Process ---" << endl;
+    cout << "Initial Heap: ";
+    h.display();
+    while (!h.isEmpty()) {
+        int minVal = h.deletemin();
+        sortedResult[count++] = minVal;
+
+        cout << "Deleted: " << minVal << " | Current Heap: ";
+        h.display();
+    }
+    cout << "\n--- Final Result ---" << endl;
+    cout << "Sorted Array: ";
+    for (int i = 0; i < n; i++) {
+        cout << sortedResult[i] << " ";
+    }
+    cout << endl;
+
+    delete[] inputData;
+    delete[] sortedResult;
+    return 0;
+}
+[24bcsl05@mepcolinux ex4]$c++ -c heappp.cpp
+[24bcsl05@mepcolinux ex4]$c++ -c heappp.cpp
+[24bcsl05@mepcolinux ex4]$./a.out
+Enter the number of elements: 5
+Enter 5 numbers: 4 3 8 2 9
+
+--- Iteration Process ---
+Initial Heap: 2 3 8 4 9
+Deleted: 2 | Current Heap: 3 4 8 9
+Deleted: 3 | Current Heap: 4 9 8
+Deleted: 4 | Current Heap: 8 9
+Deleted: 8 | Current Heap: 9
+Deleted: 9 | Current Heap: [Empty]
+
+--- Final Result ---
+Sorted Array: 2 3 4 8 9
