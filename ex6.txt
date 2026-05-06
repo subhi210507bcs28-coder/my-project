@@ -1,0 +1,126 @@
+#include <iostream>
+using namespace std;
+
+void printMatrix(int D[10][10], int n, int step) {
+    cout << "\n D(" << step << ")\n";
+    for (int i = 0; i < n; i++) {
+        for (int j = 0; j < n; j++) {
+            if (D[i][j] == -1) cout << "-1\t";
+            else cout << D[i][j] << "\t";
+        }
+        cout << endl;
+    }
+}
+
+int main() {
+    int n, edges;
+    int D[10][10];
+
+    cout << "enter no of vertices: ";
+    cin >> n;
+
+    for (int i = 0; i < n; i++) {
+        for (int j = 0; j < n; j++) {
+            if (i == j) D[i][j] = 0;
+            else D[i][j] = -1;
+        }
+    }
+
+    cout << "enter number of paths: ";
+    cin >> edges;
+
+    for (int i = 0; i < edges; i++) {
+        int u, v, cost;
+        cout << "enter start vertex: ";
+        cin >> u;
+        cout << "enter end vertex: ";
+        cin >> v;
+        cout << "enter cost between " << u << "," << v << ": ";
+        cin >> cost;
+
+        if (u > 0 && u <= n && v > 0 && v <= n) {
+            D[u-1][v-1] = cost;
+        } else {
+            cout << "Invalid vertex!" << endl;
+            i--;
+        }
+    }
+
+    printMatrix(D, n, 0);
+
+    for (int k = 0; k < n; k++) {
+        for (int i = 0; i < n; i++) {
+            for (int j = 0; j < n; j++) {
+                if (D[i][k] != -1 && D[k][j] != -1) {
+                    int newDist = D[i][k] + D[k][j];
+                    if (D[i][j] == -1 || newDist < D[i][j]) {
+                        D[i][j] = newDist;
+                    }
+                }
+            }
+        }
+        printMatrix(D, n, k + 1);
+    }
+
+    return 0;
+}
+[24bcsl05@mepcolinux ex6]$./a.out
+enter no of vertices: 5
+enter number of paths: 5
+enter start vertex: 1
+enter end vertex: 3
+enter cost between 1,3: 3
+enter start vertex: 2
+enter end vertex: 1
+enter cost between 2,1: 2
+enter start vertex: 4
+enter end vertex: 1
+enter cost between 4,1: 6
+enter start vertex: 3
+enter end vertex: 4
+enter cost between 3,4: 1
+enter start vertex: 3
+enter end vertex: 2
+enter cost between 3,2: 6
+
+ D(0)
+0       -1      3       -1      -1
+2       0       -1      -1      -1
+-1      6       0       1       -1
+6       -1      -1      0       -1
+-1      -1      -1      -1      0
+
+ D(1)
+0       -1      3       -1      -1
+2       0       5       -1      -1
+-1      6       0       1       -1
+6       -1      9       0       -1
+-1      -1      -1      -1      0
+
+ D(2)
+0       -1      3       -1      -1
+2       0       5       -1      -1
+8       6       0       1       -1
+6       -1      9       0       -1
+-1      -1      -1      -1      0
+
+ D(3)
+0       9       3       4       -1
+2       0       5       6       -1
+8       6       0       1       -1
+6       15      9       0       -1
+-1      -1      -1      -1      0
+
+ D(4)
+0       9       3       4       -1
+2       0       5       6       -1
+7       6       0       1       -1
+6       15      9       0       -1
+-1      -1      -1      -1      0
+
+ D(5)
+0       9       3       4       -1
+2       0       5       6       -1
+7       6       0       1       -1
+6       15      9       0       -1
+-1      -1      -1      -1      0
