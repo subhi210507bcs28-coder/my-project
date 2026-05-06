@@ -1,0 +1,172 @@
+include <iostream>
+#include <vector>
+#include <queue>
+#include <algorithm>
+#include <string>
+#include <sstream>
+
+using namespace std;
+
+struct ItemData {
+    int id, value, weight;
+};
+
+struct KnapNode {
+    int level, profit, weight;
+    float bound;
+    vector<int> includedItems;
+    string path;
+};
+
+// Helper for older compilers (pre-C++11)
+string toString(int n) {
+    stringstream ss;
+    ss << n;
+    return ss.str();
+}
+
+bool compareDensity(ItemData a, ItemData b) {
+    return (double)a.value / a.weight > (double)b.value / b.weight;
+}
+
+float calculateBound(KnapNode u, int n, int W, vector<ItemData>& items) {
+    if (u.weight >= W) return 0;
+    float profit_bound = (float)u.profit;
+    int j = u.level + 1;
+    int total_weight = u.weight;
+
+    while (j < n && total_weight + items[j].weight <= W) {
+        total_weight += items[j].weight;
+        profit_bound += items[j].value;
+        j++;
+    }
+    if (j < n)
+        profit_bound += (W - total_weight) * (float)items[j].value / items[j].weight;
+
+    return profit_bound;
+}
+
+int main() {
+    int n, W;
+    cout << "Enter number of items: "; cin >> n;
+    cout << "Enter capacity: "; cin >> W;
+
+    vector<ItemData> items(n);
+    for (int i = 0; i < n; i++) {
+        cout << "Item " << i + 1 << " (Value Weight): ";
+        cin >> items[i].value >> items[i].weight;
+        items[i].id = i + 1;
+    }
+
+    sort(items.begin(), items.end(), compareDensity);
+
+    queue<KnapNode> Q;
+    KnapNode u, v;
+    u.level = -1; u.profit = 0; u.weight = 0; u.path = "Root";
+    u.bound = calculateBound(u, n, W, items);
+    Q.push(u);
+
+    int maxProfit = 0;
+    vector<int> bestSet;
+    string bestPath = "";
+
+    cout << "\n--- Starting Branch and Bound Exploration ---\n";
+
+    while (!Q.empty()) {
+        u = Q.front();
+        Q.pop();
+
+        if (u.level == n - 1) continue;
+
+        v.level = u.level + 1;
+
+        // --- BRANCH: INCLUDE ---
+        v.weight = u.weight + items[v.level].weight;
+        v.profit = u.profit + items[v.level].value;
+        v.includedItems = u.includedItems;
+        v.includedItems.push_back(items[v.level].id);
+        v.path = u.path + " -> " + toString(items[v.level].id) + "(In)";
+
+        if (v.weight <= W) {
+            if (v.profit > maxProfit) {
+                maxProfit = v.profit;
+                bestSet = v.includedItems;
+                bestPath = v.path;
+            }
+            v.bound = calculateBound(v, n, W, items);
+            cout << "[INCLUDE] Item " << items[v.level].id << " | Profit: " << v.profit
+                 << " | Weight: " << v.weight << " | Bound: " << v.bound;
+
+            if (v.bound > maxProfit) {
+                Q.push(v);
+                cout << " -> Queued" << endl;
+            } else {
+                cout << " -> Pruned (Bound <= Max)" << endl;
+            }
+        } else {
+            cout << "[INCLUDE] Item " << items[v.level].id << " -> Overweight (Pruned)" << endl;
+        }
+
+        // --- BRANCH: EXCLUDE ---
+        v.weight = u.weight;
+        v.profit = u.profit;
+        v.includedItems = u.includedItems;
+        v.path = u.path + " -> " + toString(items[v.level].id) + "(Out)";
+        v.bound = calculateBound(v, n, W, items);
+
+        cout << "[EXCLUDE] Item " << items[v.level].id << " | Profit: " << v.profit
+             << " | Weight: " << v.weight << " | Bound: " << v.bound;
+
+        if (v.bound > maxProfit) {
+            Q.push(v);
+            cout << " -> Queued" << endl;
+        } else {
+            cout << " -> Pruned (Bound <= Max)" << endl;
+        }
+        cout << "----------------------------------------------" << endl;
+    }
+
+    cout << "\nMaximum Profit: " << maxProfit << endl;
+    cout << "Items included in the knapsack: { ";
+    for (size_t i = 0; i < bestSet.size(); i++)
+        cout << bestSet[i] << (i == bestSet.size() - 1 ? "" : ", ");
+    cout << " }" << endl;
+    cout << "Final Path: " << bestPath << endl;
+
+    return 0;
+}
+
+f items: 4
+Enter capacity: 10
+Item 1 (Value Weight): 40
+4
+Item 2 (Value Weight): 42
+7
+Item 3 (Value Weight): 25
+5
+Item 4 (Value Weight): 12
+3
+
+--- Starting Branch and Bound Exploration ---
+[INCLUDE] Item 1 | Profit: 40 | Weight: 4 | Bound: 76 -> Queued
+[EXCLUDE] Item 1 | Profit: 0 | Weight: 0 | Bound: 57 -> Queued
+----------------------------------------------
+[INCLUDE] Item 2 -> Overweight (Pruned)
+[EXCLUDE] Item 2 | Profit: 40 | Weight: 4 | Bound: 69 -> Queued
+----------------------------------------------
+[INCLUDE] Item 2 | Profit: 42 | Weight: 7 | Bound: 57 -> Queued
+[EXCLUDE] Item 2 | Profit: 0 | Weight: 0 | Bound: 37 -> Pruned (Bound <= Max)
+----------------------------------------------
+[INCLUDE] Item 3 | Profit: 65 | Weight: 9 | Bound: 69 -> Queued
+[EXCLUDE] Item 3 | Profit: 40 | Weight: 4 | Bound: 52 -> Pruned (Bound <= Max)
+----------------------------------------------
+[INCLUDE] Item 3 -> Overweight (Pruned)
+[EXCLUDE] Item 3 | Profit: 42 | Weight: 7 | Bound: 54 -> Pruned (Bound <= Max)
+----------------------------------------------
+[INCLUDE] Item 4 -> Overweight (Pruned)
+[EXCLUDE] Item 4 | Profit: 65 | Weight: 9 | Bound: 65 -> Pruned (Bound <= Max)
+----------------------------------------------
+
+Maximum Profit: 65
+Items included in the knapsack: { 1, 3 }
+Final Path: Root -> 1(In) -> 2(Out) -> 3(In)
