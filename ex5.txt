@@ -1,0 +1,196 @@
+#include <iostream>
+using namespace std;
+
+int main()
+{
+    int n;
+    cout << "Enter number of elements: ";
+    cin >> n;
+
+    int A[n], Count[n], S[n];
+
+    cout << "Enter elements:\n";
+    for (int i = 0; i < n; i++)
+        cin >> A[i];
+
+
+    for (int i = 0; i < n; i++)
+        Count[i] = 0;
+
+    cout << "\nArray A[0.." << n - 1 << "]:\n";
+    for (int i = 0; i < n; i++)
+        cout << A[i] << " ";
+    cout << "\n";
+
+
+    cout << "\nInitially Count[]:\n";
+    for (int i = 0; i < n; i++)
+        cout << Count[i] << " ";
+    cout << "\n";
+
+
+    for (int i = 0; i < n - 1; i++)
+    {
+        for (int j = i + 1; j < n; j++)
+        {
+                                                            if (A[i] < A[j])
+                Count[j]++;
+            else
+                Count[i]++;
+        }
+
+
+        cout << "\nAfter pass i = " << i << ":\n";
+        cout << "Count[]: ";
+        for (int k = 0; k < n; k++)
+            cout << Count[k] << " ";
+        cout << "\n";
+    }
+
+
+    cout << "\nFinal Count[]:\n";
+    for (int i = 0; i < n; i++)
+        cout << Count[i] << " ";
+    cout << "\n";
+
+
+    for (int i = 0; i < n; i++)
+        S[Count[i]] = A[i];
+
+
+    cout << "\nArray S[0.." << n - 1 << "]:\n";
+    for (int i = 0; i < n; i++)
+        cout << S[i] << " ";
+    cout << "\n";
+
+    return 0;
+}
+[24bcsl05@mepcolinux ex5]$c++ -c countt.cpp
+[24bcsl05@mepcolinux ex5]$c++ -c countt.cpp
+[24bcsl05@mepcolinux ex5]$./a.out
+Enter number of elements: 4
+Enter elements:
+78 34 56 89
+
+Array A[0..3]:
+78 34 56 45
+
+Initially Count[]:
+0 0 0 0
+
+After pass i = 0:
+Count[]: 3 0 0 0
+
+After pass i = 1:
+Count[]: 3 0 1 1
+
+After pass i = 2:
+Count[]: 3 0 2 1
+
+Final Count[]:
+3 0 2 1
+
+Array S[0..3]:
+34 45 56 78
+[24bcsl05@mepcolinux ex5]$cat horspool.cpp
+#include <iostream>
+#include <string>
+using namespace std;
+
+int main()
+{
+    string text, pattern;
+
+    cout << "Enter Text: ";
+    cin >> text;
+
+    cout << "Enter Pattern: ";
+    cin >> pattern;
+
+    int n = text.length();
+    int m = pattern.length();
+
+    int shift[256];
+    for (int i = 0; i < 256; i++)
+        shift[i] = m;
+
+    for (int j = 0; j < m - 1; j++)
+        shift[pattern[j]] = m - 1 - j;
+    cout << "\nShift Table:\n";
+    for (int i = 0; i < 256; i++)
+    {
+        if (shift[i] != m)
+            cout << char(i) << " : " << shift[i] << endl;
+    }
+
+    int i = m - 1;
+    int comparisons = 0;
+    int alignments = 0;
+
+    cout << "\n--- Matching Process ---\n";
+    while (i <= n - 1)
+    {
+        alignments++;
+
+        cout << "\nAlignment " << alignments << ":\n";
+        cout << text << endl;
+        for (int s = 0; s < i - (m - 1); s++)
+            cout << " ";
+        cout << pattern << endl;
+
+        int k = 0;
+
+        while (k <= m - 1 && pattern[m - 1 - k] == text[i - k])
+        {
+            comparisons++;
+            k++;
+        }
+
+
+        if (k < m)
+            comparisons++;
+
+        if (k == m)
+        {
+            cout << "Pattern found at index: " << i - m + 1 << endl;
+            cout << "Total Comparisons: " << comparisons << endl;
+            cout << "Total Alignments: " << alignments << endl;
+            return 0;
+        }
+        else
+        {
+            cout << "Mismatch at text[" << i << "] = " << text[i] << endl;
+            cout << "Shift by: " << shift[text[i]] << endl;
+
+            i = i + shift[text[i]];
+        }
+    }
+
+    cout << "\nPattern not found\n";
+    cout << "Total Comparisons: " << comparisons << endl;
+    cout << "Total Alignments: " << alignments << endl;
+
+    return 0;
+}
+[24bcsl05@mepcolinux ex5]$c++ -c horspool.cpp
+[24bcsl05@mepcolinux ex5]$c++ -c horspool.cpp
+[24bcsl05@mepcolinux ex5]$./a.out
+Enter Text: HELLO WORLD
+Enter Pattern:
+Shift Table:
+L : 1
+O : 3
+R : 2
+W : 4
+
+--- Matching Process ---
+
+Alignment 1:
+HELLO
+WORLD
+Mismatch at text[4] = O
+Shift by: 3
+
+Pattern not found
+Total Comparisons: 1
+Total Alignments: 1
